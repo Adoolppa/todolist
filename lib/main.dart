@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 
-final List<String> item = [];
-
 void main() {
-  runApp(MyApp());
+  runApp(TodoApp());
 }
 
-class MyApp extends StatelessWidget {
+class TodoApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -16,21 +14,48 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(title: 'To Do'),
+      home: TodoList(title: 'To Do'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+class TodoList extends StatefulWidget {
+  TodoList({Key key, this.title}) : super(key: key);
 
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  TodoListState createState() => TodoListState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class TodoListState extends State<TodoList> {
+
+  List<String> todoList = [];
+
+  Widget todoListBody() {
+    return new ListView.builder(
+        itemBuilder: (context, index) {
+          if(index < todoList.length) {
+            return listViewBuildToDoItem(todoList[index], index);
+          }
+        }
+    );
+  }
+
+  Widget listViewBuildToDoItem(String todoText, int index) {
+    return new ListTile(
+      title: Text(todoText),
+      onTap: () => removeItem(index),
+    );
+  }
+
+  addItem(String item) {
+    setState(() => todoList.add(item));
+  }
+
+  removeItem(int index) {
+    setState(() => todoList.removeAt(index));
+  }
 
   createInputDialog(BuildContext context)  {
     TextEditingController customController = new TextEditingController();
@@ -46,7 +71,8 @@ class _MyHomePageState extends State<MyHomePage> {
             elevation:5.0,
             child : Text('Submit'),
             onPressed: () {
-              item.add(customController.text);
+              addItem(customController.text);
+              Navigator.pop(context);
               },
           )
         ],
@@ -60,38 +86,15 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: BodyLayout(),
-      floatingActionButton: Row(
-        children: [
-          FloatingActionButton(child :
-            Text('Add'),
-              onPressed: () { createInputDialog(context);},
-            ),
-          FloatingActionButton(child :
-          Text('Clear'),
-            onPressed: () { item.clear();},
-          ),
-          ]
-        ),
+      body: todoListBody(),
+      floatingActionButton: new FloatingActionButton(
+          onPressed: () { createInputDialog(context);},
+          tooltip: 'Add',
+          child: new Icon(Icons.add)
+      ),
     );
   }
 }
 
-class BodyLayout extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return _myListView(context);
-  }
-}
 
-Widget _myListView(BuildContext context) {
-  return ListView.builder(
-    itemCount: item.length,
-    itemBuilder: (context, index) {
-      return ListTile(
-          title: Text(item[index]),
-      );
-    },
-  );
-}
 
